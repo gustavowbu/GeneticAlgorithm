@@ -23,38 +23,63 @@ class Vector2():
     def __len__(self) -> float:
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
-    def __eq__(self, other) -> Self:
+    def __eq__(self, other) -> bool:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other
         if isinstance(other, (int, float)):
             return self.x == other and self.y == other
         return self.x == other.x and self.y == other.y
 
-    def __ne__(self, other) -> Self:
+    def __ne__(self, other) -> bool:
         return not (self == other)
 
-    def __gt__(self, other) -> Self:
+    def __gt__(self, other) -> bool:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other
         if isinstance(other, (int, float)):
             return len(self) > other
         return len(self) > len(other)
 
-    def __lt__(self, other) -> Self:
+    def __lt__(self, other) -> bool:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other
         if isinstance(other, (int, float)):
             return len(self) < other
         return len(self) < len(other)
 
-    def __ge__(self, other) -> Self:
+    def __ge__(self, other) -> bool:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other
         if isinstance(other, (int, float)):
             return len(self) >= other
         return len(self) >= len(other)
 
-    def __le__(self, other) -> Self:
+    def __le__(self, other) -> bool:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other
         if isinstance(other, (int, float)):
             return len(self) <= other
         return len(self) <= len(other)
+
+    def gt(self, other: Self) -> bool:
+        other = to_Vector2(other)
+        return self.x > other.x and self.y > other.y
+
+    def lt(self, other: Self) -> bool:
+        other = to_Vector2(other)
+        return self.x < other.x and self.y < other.y
+
+    def ge(self, other: Self) -> bool:
+        other = to_Vector2(other)
+        return self.x >= other.x and self.y >= other.y
+
+    def le(self, other: Self) -> bool:
+        other = to_Vector2(other)
+        return self.x <= other.x and self.y <= other.y
+
+    def __neg__(self):
+        return Vector2(-self.x, -self.y)
+
+    def neg_x(self):
+        return Vector2(-self.x, self.y)
+
+    def neg_y(self):
+        return Vector2(self.x, self.y)
 
     def __add__(self, other) -> Self:
         other = to_Vector2(other) if not isinstance(other, (int, float)) else other

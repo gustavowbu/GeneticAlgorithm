@@ -1,142 +1,134 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from pygame.locals import (
-    RLEACCEL,
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
     K_ESCAPE,
     KEYDOWN,
     QUIT,
 )
+import json
+import socket
 
-from DataTypes.Direction import Direction
 from DataTypes.Vector2 import Vector2
-from Game.entities import Person
+from DataTypes.Direction import Direction
+from Game.EntityList import EntityList
+from Game.entities import Entity, Person
+import Game.functions as funcs
 
-update = 0
-entities: pygame.sprite.Group = None
-all_sprites: pygame.sprite.Group = None
-ADDENTITY = pygame.USEREVENT + 1
+# Variables
+update = 10
 
-player_active: bool = False
-player_id: int = None
-player = None
+entities = EntityList()
+all_sprites: pygame.sprite.Group = pygame.sprite.Group()
 
-def start():
-    global update, entities, all_sprites, player_id, player
+# Functions
+client_socket = None
+server_address = ('localhost', 65432)
+spectator_id: int = None
+def join_server():
+    global client_socket, spectator_id
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    message = {"type": "spectate", "position": str(Vector2(0, 0)), "direction": None, "state": None}
+    message = json.dumps(message)
+    data = bytes(message, "utf-8")
 
-    pygame.init()
+    # Sending spectate message
+    client_socket.sendto(data, server_address)
 
-    LOGICAL_SIZE = (560, 315)
-    WINDOW_SIZE = (1120, 630)
-    window = pygame.display.set_mode(WINDOW_SIZE)
-    canvas = pygame.Surface(LOGICAL_SIZE)
+    # Waiting for a response
+    data, server = client_socket.recvfrom(4096)
+    message = data.decode("utf-8")
+    m: dict = json.loads(message)
 
-    entities = pygame.sprite.Group()
-    all_sprites = pygame.sprite.Group()
-
-    update_entities()
-
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
-
-            elif event.type == QUIT:
-                running = False
-
-            elif event.type == ADDENTITY:
-                if event.entity_type == "Person":
-                    new_entity = Person(event.id, event.position, event.direction, event.state)
-                entities.add(new_entity)
-                all_sprites.add(new_entity)
-                if event.id == player_id:
-                    player = new_entity
-
-        # Handling the player
-        if not player is None:
-            pressed_keys = pygame.key.get_pressed()
-            hsp = 0
-            vsp = 0
-            if pressed_keys[K_UP]:
-                vsp -= 1
-                player.direction.update(0)
-            if pressed_keys[K_RIGHT]:
-                hsp += 1
-                player.direction.update(1)
-            if pressed_keys[K_DOWN]:
-                vsp += 1
-                player.direction.update(2)
-            if pressed_keys[K_LEFT]:
-                hsp -= 1
-                player.direction.update(3)
-            player.rect.move_ip(hsp, vsp)
-
-            if hsp != 0 or vsp != 0:
-                player.state = "walk"
-            else:
-                player.state = "idle"
-
-        canvas.fill((155, 250, 106))
-
-        if update <= 0:
-            update_entities()
-            update_file()
-            update = 10
-        if player_active and player_id is None:
-            create_player()
-
-        for entity in all_sprites:
-            entity.tick()
-            canvas.blit(entity.surf, entity.rect)
-
-        pygame.transform.scale(canvas, WINDOW_SIZE, window)
-        pygame.display.flip()
-
-        update -= 1
-        clock = pygame.time.Clock()
-        clock.tick(60)
-
-    # Update the file when the game is finished
-    player.kill()
-    update_file()
+    if m["type"] == "id":
+        spectator_id = m["value"]
+    else:
+        raise TypeError(f"Invalid message type '{message["type"]}'. Expected 'id'")
 
 # Function not used. Code rewritten in update_entities() for the sake of performance.
-def get_entities_from_file():
-    with open("Game/entities.txt") as file:
-        file = file.readlines()
-
-    new_entities = []
-    for entity in file:
-        entity = entity[:-1]
-        properties = entity.split("; ")
-        dictionary = {}
-        for property in properties:
-            key, value = property.split(": ")
-            if value.isdecimal():
-                value = int(value)
-            elif value.startswith("Vector2"):
-                x, y = value[8:-1].split(", ")
-                value = Vector2(float(x), float(y))
-            if key == "direction":
-                value = Direction(value)
-            dictionary[key] = value
-
-        entity_type = dictionary["entity_type"]
-        dictionary.pop("entity_type")
-        if entity_type == "Person":
-            entity = Person(**dictionary)
-        else:
-            raise ValueError("'entity_type' must be 'Person', ")
-
-        new_entities.append(entity)
-
-    return new_entities
-
 def update_entities():
+    # Sending getinfo message
+    message = {"type": "getinfo", "id": spectator_id}
+    message = json.dumps(message)
+    message = bytes(message, "utf-8")
+    client_socket.sendto(message, server_address)
+
+    # Waiting for a response
+    data, server = client_socket.recvfrom(4096)
+    message = data.decode("utf-8")
+    m: dict = json.loads(message)
+
+    if m["type"] == "getinfo return":
+        m.pop("type")
+        for key in m.keys():
+            new_entity = funcs.json_to_dict(m[key])
+
+            # Adjusting position relative to the camera
+            new_entity["position"] = new_entity["position"] + Vector2(LOGICAL_SIZE[0], LOGICAL_SIZE[1]) / 2 - camera_position
+
+            if new_entity["id"] in entities:
+                entity = entities[new_entity["id"]]
+                entity.position = new_entity["position"]
+                entity.direction = new_entity["direction"]
+                entity.state = new_entity["state"]
+            else:
+                if new_entity["entity_type"] == "Person":
+                    new_entity.pop("entity_type")
+                    new_entity = Person(**new_entity)
+                elif new_entity["entity_type"] == "Spectator":
+                    continue #TODO: Implement
+                else:
+                    raise TypeError("'entity_type' must be 'Person'")
+                new_entity.init_ui()
+                entities.append(new_entity)
+                print(new_entity)
+                all_sprites.add(new_entity)
+    else:
+        raise TypeError(f"Invalid message type '{message["type"]}'. Expected 'id'")
+
+# Init pygame
+pygame.init()
+
+# Window variables
+LOGICAL_SIZE = (560, 315)
+WINDOW_SIZE = (1120, 630)
+camera_position = Vector2(0, 0)
+window = pygame.display.set_mode(WINDOW_SIZE)
+canvas = pygame.Surface(LOGICAL_SIZE)
+
+# Connect to server
+join_server()
+
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                running = False
+
+        elif event.type == QUIT:
+            running = False
+
+    # Fill with background
+    canvas.fill((155, 250, 106))
+
+    # Display and tick sprites
+    update_entities()
+    for sprite in all_sprites:
+        canvas.blit(sprite.surf, sprite.rect)
+        sprite.tick()
+
+    # Display
+    pygame.transform.scale(canvas, WINDOW_SIZE, window)
+    pygame.display.flip()
+
+    # Tick
+    clock = pygame.time.Clock()
+    clock.tick(60)
+    update -= 1
+
+""" def update_entities():
     global entities, ADDENTITY, player_id
     entities_alive = [False for i in range(len(entities))]
 
@@ -237,4 +229,4 @@ def update_file():
         new_content += str(entity) + "\n"
 
     with open("Game/entities.txt", "w") as file:
-        file.write(new_content)
+        file.write(new_content) """

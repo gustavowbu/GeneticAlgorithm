@@ -12,10 +12,9 @@ class Direction():
         if isinstance(direction, str):
             direction = direction.lower()
             if not direction in ("up", "right", "down", "left"):
-                self.name = direction
-                self.number = {"up": 0, "right": 1, "down": 2, "left": 3}[direction]
-            else:
                 raise ValueError("'direction' must be int or 'up', 'right', 'down' or 'left'")
+            self.name = direction
+            self.number = {"up": 0, "right": 1, "down": 2, "left": 3}[direction]
         elif isinstance(direction, int):
             direction = direction % 4
             self.number = direction

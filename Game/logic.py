@@ -1,37 +1,23 @@
-from DataTypes.Vector2 import Vector2
+import json
+from typing import Any
+
 from DataTypes.Direction import Direction
-from Game.entities import Entity, Person
+from DataTypes.Vector2 import Vector2
+from Game.EntityList import EntityList
 
 
-world = Vector2(800, 600)
-entities: list[Entity] = []
-last_id = 0
+world = Vector2(800, 600) # from -800, -600 to 800, 600
+camera_size = Vector2(560, 315) # from -280, -157.5 to 280, 157.5 or from 0, 0 to 560, 315
+entities = EntityList()
 
-def add_entity(entity_type: str, position: Vector2 = None, direction: int = None):
-    global entities, last_id
+def visible_to(id: int) -> EntityList:
+    viewing_entity = entities[id]
+    p = viewing_entity.position
+    c = camera_size / 2
+    camera = (p + c.neg_y(), p + c, p + c.neg_x(), p - c)
 
-    if position is None:
-        position = world / 2
-    if direction is None:
-        direction = Direction("up")
-
-    if entity_type == "Person":
-        entity = Person(last_id, position, direction)
-    else:
-        raise ValueError("'entity_type' must be 'Person', ")
-    last_id += 1
-
-    entities.append(entity)
-
-def move_entity(id: int, position: Vector2):
-    entity = gebi(id)
-    entity.position = position
-
-def get_entity_by_id(id: int) -> Entity:
-    for i in range(len(entities)):
-        if entities[i].id == id:
-            return entities[i]
-    raise IndexError(f"No entity with id '{id}'")
-
-def gebi(id: int) -> Entity:
-    return get_entity_by_id(id)
+    visible = EntityList()
+    for entity in entities:
+        if entity.is_in_area(camera):
+            visible.append(entity)
+    return visible
