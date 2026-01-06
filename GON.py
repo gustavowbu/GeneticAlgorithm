@@ -21,7 +21,10 @@ class Gon(): # Game Object Notation
                 elif isinstance(value[key], (list, dict)):
                     value[key] = Gon()._parse_iterator(value[key])
                 else:
-                    value[key] = str(value[key])
+                    if hasattr(value[key], "to_GON"):
+                        value[key] = value[key].to_GON(self)
+                    else:
+                        value[key] = str(value[key])
         elif isinstance(value, list):
             for i in range(len(value)):
                 if isinstance(value[i], (int, float, bool, str)):
@@ -29,7 +32,10 @@ class Gon(): # Game Object Notation
                 elif isinstance(value[i], (list, dict)):
                     value[i] = Gon()._parse_iterator(value[i])
                 else:
-                    value[i] = str(value[i])
+                    if hasattr(value[i], "to_GON"):
+                        value[i] = value[i].to_GON()
+                    else:
+                        value[i] = str(value[i])
         else:
             raise TypeError("'value' must be dict or list")
         return value
@@ -79,9 +85,9 @@ class Gon(): # Game Object Notation
                 brackets = 1
                 for i in range(len(value)):
                     c = value[i]
-                    if c == "(":
+                    if c == "(" or c == "[":
                         brackets += 1
-                    if c == ")":
+                    if c == ")" or c == "]":
                         brackets -= 1
                         if brackets == 0:
                             kwargs[key] = self._parse_value(vvalue)
@@ -128,5 +134,7 @@ class Gon(): # Game Object Notation
                     pass
                 if value in ("true", "false"):
                     return value == "true"
+                if (value.startswith("[") and value.endswith("]")) or (value.startswith("{") and value.endswith("}")):
+                    return self.loads(value)
 
         return value

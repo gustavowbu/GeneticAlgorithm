@@ -6,13 +6,11 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
 )
-import json
-import socket
 
 from DataTypes.Vector2 import Vector2
 from DataTypes.Direction import Direction
 from Game.EntityList import EntityList
-from Game.entities import Entity, Human, Spectator
+from Game.entities_ui import EntitySprite, HumanSprite, SpectatorSprite
 
 import client
 
@@ -21,69 +19,30 @@ entities = EntityList()
 all_sprites: pygame.sprite.Group = pygame.sprite.Group()
 
 # Functions
-client_socket = None
-server_address = ('localhost', 65432)
-spectator_id: int = None
-def join_server():
-    global client_socket, spectator_id
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    message = {"type": "spectate", "position": str(Vector2(0, 0)), "direction": None, "state": None}
-    message = json.dumps(message)
-    data = bytes(message, "utf-8")
-
-    # Sending spectate message
-    client_socket.sendto(data, server_address)
-
-    # Waiting for a response
-    data, server = client_socket.recvfrom(4096)
-    message = data.decode("utf-8")
-    m: dict = json.loads(message)
-
-    if m["type"] == "id":
-        spectator_id = m["value"]
-    else:
-        raise TypeError(f"Invalid message type '{message["type"]}'. Expected 'id'")
-
-# Function not used. Code rewritten in update_entities() for the sake of performance.
 def update_entities():
-    # Sending getinfo message
-    message = {"type": "getinfo", "id": spectator_id}
-    message = json.dumps(message)
-    message = bytes(message, "utf-8")
-    client_socket.sendto(message, server_address)
+    game_entities = client.getinfo()
+    for entity in game_entities:
+        # New entity
+        if not entity.id in entities:
+            entity_sprite = entity.to_Sprite()
+            entities.append(entity_sprite)
+            all_sprites.add(entity_sprite)
+        # Existing entity
+        else:
+            entity_sprite: EntitySprite = entities[entity.id]
 
-    # Waiting for a response
-    data, server = client_socket.recvfrom(4096)
-    message = data.decode("utf-8")
-    m: dict = json.loads(message)
+            # Update information
+            entity_sprite.position = entity.position
+            entity_sprite.direction = entity.direction
+            entity_sprite.state = entity.state
 
-    if m["type"] == "getinfo return":
-        m.pop("type")
-        for key in m.keys():
-            new_entity = funcs.json_to_dict(m[key])
+        # Adjusting position relative to the camera
+        entity_sprite.position = entity_sprite.position + Vector2(LOGICAL_SIZE[0], LOGICAL_SIZE[1]) / 2 - camera_position
 
-            # Adjusting position relative to the camera
-            new_entity["position"] = new_entity["position"] + Vector2(LOGICAL_SIZE[0], LOGICAL_SIZE[1]) / 2 - camera_position
-
-            if new_entity["id"] in entities:
-                entity = entities[new_entity["id"]]
-                entity.position = new_entity["position"]
-                entity.direction = new_entity["direction"]
-                entity.state = new_entity["state"]
-            else:
-                if new_entity["entity_type"] == "Human":
-                    new_entity.pop("entity_type")
-                    new_entity = Human(**new_entity)
-                elif new_entity["entity_type"] == "Spectator":
-                    continue #TODO: Implement
-                else:
-                    raise TypeError("'entity_type' must be 'Human'")
-                new_entity.init_ui()
-                entities.append(new_entity)
-                print(new_entity)
-                all_sprites.add(new_entity)
-    else:
-        raise TypeError(f"Invalid message type '{message["type"]}'. Expected 'id'")
+    # Dead entities
+    for entity_sprite in entities:
+        if not entity_sprite.id in game_entities:
+            entities.remove(entity_sprite.id)
 
 # Init pygame
 pygame.init()
@@ -123,6 +82,7 @@ while running:
     pygame.display.flip()
 
     # Tick
+    update_entities()
     clock = pygame.time.Clock()
     clock.tick(60)
 

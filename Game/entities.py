@@ -1,6 +1,7 @@
 from typing import Self
 from DataTypes.Direction import Direction
 from DataTypes.Vector2 import Vector2
+from Game.entities_ui import EntitySprite, HumanSprite, SpectatorSprite
 
 
 class Entity():
@@ -56,10 +57,43 @@ class Entity():
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(id={self.id}, position={self.position}, direction={self.direction}, state={self.state})"
 
+    def to_Sprite(self) -> EntitySprite:
+        return EntitySprite(self.id, self.position, self.direction, self.state)
+
+    """ def update(self, position: Vector2, direction: Direction, state: str):
+        self.position = position
+        self.direction = direction
+        self.state = state
+
+    def get_four_corners(self) -> tuple[Vector2, Vector2, Vector2, Vector2]:
+        tr = self.position + Vector2(self.width, -self.height) / 2
+        br = self.position + Vector2(self.width, self.height) / 2
+        bl = self.position - Vector2(self.width, -self.height) / 2
+        tl = self.position - Vector2(self.width, self.height) / 2
+        return tr, br, bl, tl
+
+    def is_in_area(self, area: tuple[Vector2, Vector2, Vector2, Vector2]) -> bool:
+        tr, br, bl, tl = self.get_four_corners()
+        area_tr, area_br, area_bl, area_tl = area
+
+        # Flipping the top right and bottom left corners in the x axis
+        # so that it's easier to check
+        bl = bl.neg_x()
+        area_tr = area_tr.neg_x()
+        tr = tr.neg_x()
+        area_bl = area_bl.neg_x()
+        return (br.gt(area_tl) and tl.lt(area_br)) or (bl.gt(area_tr) and tr.lt(area_bl)) """
+
 class Human(Entity):
     def __init__(self, id: int, position: Vector2, direction: Direction, state: str):
         super().__init__(id, position, direction, state)
 
+    def to_Sprite(self) -> HumanSprite:
+        return HumanSprite(self.id, self.position, self.direction, self.state)
+
 class Spectator(Entity):
     def __init__(self, id: int, position: Vector2, direction: Direction, state: str):
         super().__init__(id, position, direction, state)
+
+    def to_Sprite(self) -> SpectatorSprite:
+        return SpectatorSprite(self.id, self.position, self.direction, self.state)

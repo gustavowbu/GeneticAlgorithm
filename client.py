@@ -1,6 +1,7 @@
 import socket
 
 from GON import Gon
+from Game.EntityList import EntityList
 
 # Create a UDP/IP socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -65,7 +66,7 @@ def leave_server():
     client_socket.close()
     print("Left server.")
 
-def getinfo():
+def getinfo() -> EntityList:
     """ Gets entity info from the server. """
 
     message = {"type": "getinfo"}

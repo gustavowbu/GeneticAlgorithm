@@ -13,19 +13,14 @@ class EntityList():
     def __init__(self, entities: list[Entity] = None):
         self.entities = entities if not entities is None else []
 
-    def from_str(self, string: str, gon) -> Self:
-        """ returns a new EntityList from a string in the format 'EntityList(entities)' """
-
-        result = type(self)()
-        string = string[11:-1]
-        result.entities = gon.loads(string)
-        return result
-
     def __repr__(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
         return f"EntityList(entities={self.entities})"
+
+    def to_GON(self, gon) -> str:
+        return f"EntityList(entities={gon.dumps(self.entities)})"
 
     def add(self, entity_type: str, position: Vector2 = None, direction: int = None, state: str = None):
         """ Adds an entity and returns it. """

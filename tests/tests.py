@@ -22,9 +22,18 @@ print(value)
 
 print()
 
-value = EntityList([Entity(1, Vector2(1.3, 4.5), 3, "idle"), Human(2, Vector2(3.2, 7.1), 4, "walk")])
+value = {"entities": EntityList([Entity(1, Vector2(1.3, 4.5), 3, "idle"), Human(2, Vector2(3.2, 7.1), 4, "walk")])}
 print(value)
-string = Gon().dumps(value.entities)
+string = Gon().dumps(value)
+print(string)
+value = Gon().loads(string)
+print(value)
+
+print()
+
+value = {"entities": EntityList([])}
+print(value)
+string = Gon().dumps(value)
 print(string)
 value = Gon().loads(string)
 print(value)
