@@ -8,9 +8,7 @@ class Direction():
     def __init__(self, direction: str | int):
         if isinstance(direction, Direction):
             direction = direction.number
-        self.update(direction)
 
-    def update(self, direction: str | int):
         if isinstance(direction, str):
             direction = direction.lower()
             if not direction in ("n", "ne", "e", "se", "s", "sw", "w", "nw"):
@@ -82,3 +80,9 @@ class Direction():
         if not isinstance(other, int):
             raise ValueError("'other' must be int")
         return Direction(self.number // other)
+
+    def get_4_direction_name(self) -> str:
+        return self.name[0]
+
+    def get_4_direction_number(self) -> int:
+        return {0: 0, 1: 0, 2: 2, 3: 4, 4: 4, 5: 4, 6: 6, 7: 0}[self.number]

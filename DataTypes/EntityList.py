@@ -2,7 +2,7 @@ from typing import Self
 
 from DataTypes.Vector2 import Vector2
 from DataTypes.Direction import Direction
-from Game.entities import Entity, Human, Spectator
+from DataTypes.entities import Entity, Human, Spectator
 
 class EntityList():
     default_position = Vector2(0, 0)
@@ -77,3 +77,6 @@ class EntityList():
             return entity
         self.iter_index = 0
         raise StopIteration
+
+    def copy(self) -> Self:
+        return type(self)(entities=[entity.copy() for entity in self.entities])

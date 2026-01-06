@@ -42,6 +42,7 @@ while True:
         if m["type"] == "sign up":
             m.pop("type")
             human = logic.entities.add(entity_type="Human")
+            logic.load_entity(human.id)
             print(f"    Human joining.")
             print(f"    Sending message with id: {human.id}")
             send_message({"type": "id", "value": human.id}, address)
@@ -59,18 +60,21 @@ while True:
         elif m["type"] == "spectate":
             m.pop("type")
             spectator = logic.entities.add(entity_type="Spectator")
+            logic.load_entity(spectator.id)
             print(f"    Spectator joining.")
             print(f"    Sending message with id: {spectator.id}")
             send_message({"type": "id", "value": spectator.id}, address)
         # m = {"type": ..., "id": ...}
         elif m["type"] == "leave":
-            print(f"    Human/Spectator leaving. ID: {m["id"]}")
-            kick_id(m["id"])
+            id = m["id"]
+            logic.unload_entity(id)
+            print(f"    Human/Spectator leaving. ID: {id}")
+            kick_id(id)
             print(f"    Sending goodbye message.")
             send_message({"type": "text", "info": "You left the server. We will miss you."}, address)
         # m = {"type": ...}
         elif m["type"] == "getinfo":
-            message = {"type": "game info update"} | {"entities": logic.loaded_entities}
+            message = {"type": "game info update"} | {"entities": logic.loaded_entities.copy()}
             send_message(message, address)
             print(f"    Sending info: {message}")
         # m = {"type": ..., "id": ..., "position": ..., "direction": ..., "state": ...}

@@ -3,8 +3,8 @@ from typing import Any
 
 from DataTypes.Direction import Direction
 from DataTypes.Vector2 import Vector2
-from Game.EntityList import EntityList
-from Game.entities import Entity, Human, Spectator
+from DataTypes.EntityList import EntityList
+from DataTypes.entities import Entity, Human, Spectator
 
 class Gon(): # Game Object Notation
     def __init__(self):

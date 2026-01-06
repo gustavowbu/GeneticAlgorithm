@@ -2,7 +2,7 @@ import threading
 import time
 
 from DataTypes.Vector2 import Vector2
-from Game.EntityList import EntityList
+from DataTypes.EntityList import EntityList
 
 
 world_max = Vector2(800, 600) # from -800, -600 to 800, 600
@@ -11,6 +11,7 @@ entities = EntityList()
 loaded_entities = EntityList()
 globals = {"world_max": world_max, "camera_size": camera_size}
 
+# Functions
 """ def visible_to(id: int) -> EntityList:
     viewing_entity = entities[id]
     p = viewing_entity.position
@@ -22,6 +23,13 @@ globals = {"world_max": world_max, "camera_size": camera_size}
         if entity.is_in_area(camera):
             visible.append(entity)
     return visible """
+
+def load_entity(id: int):
+    entity = entities[id]
+    loaded_entities.append(entity)
+
+def unload_entity(id: int):
+    loaded_entities.remove(id)
 
 tps = 2
 

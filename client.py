@@ -1,7 +1,7 @@
 import socket
 
 from GON import Gon
-from Game.EntityList import EntityList
+from DataTypes.EntityList import EntityList
 
 # Create a UDP/IP socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -63,6 +63,7 @@ def spectate_server() -> int:
 def leave_server():
     message = {"type": "leave", "id": id}
     _send_message(message)
+    _receive_message()
     client_socket.close()
     print("Left server.")
 

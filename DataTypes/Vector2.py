@@ -7,15 +7,6 @@ class Vector2():
         self.x = float(x)
         self.y = float(y)
 
-    def from_str(self, string: str) -> Self:
-        """ returns a new Vector2 from a string in the format 'Vector2(x, y)' """
-
-        result = Vector2()
-        string = string[8:-1].split(", ")
-        result.x = float(string[0])
-        result.y = float(string[1])
-        return result
-
     def __repr__(self):
         return str(self)
 

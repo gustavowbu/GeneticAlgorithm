@@ -26,11 +26,11 @@ class EntitySprite(pygame.sprite.Sprite):
         self.animations = {}
         for state in ["idle", "walk", "run"]:
             filepath = f"Game/assets/Female/Unarmed/With_shadow/Unarmed_{state.capitalize()}_with_shadow.png"
-            animation_names = [f"{state}_{direction}" for direction in ["down", "left", "right", "up"]] # This order is important because it is the order in which the animations appear in the sprites
+            animation_names = [f"{state}_{direction}" for direction in ["s", "w", "e", "n"]] # This order is important because it is the order in which the animations appear in the sprites
             self.animations |= load_animations(filepath, 64, 64, animation_names)
 
         self.animation_index = 0
-        self.animation_name = self.state + "_" + self.direction.name
+        self.animation_name = self.state + "_" + self.direction.get_4_direction_name()
         self.surf: pygame.Surface = self.animations[self.animation_name][0]
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
@@ -71,17 +71,15 @@ class HumanSprite(EntitySprite):
         super().__init__(id, position, direction, state)
 
         # UI logic
-        super(EntitySprite, self).__init__()
-
         ## Default animation
         self.animations = {}
         for state in ["idle", "walk", "run"]:
             filepath = f"Game/assets/Female/Unarmed/With_shadow/Unarmed_{state.capitalize()}_with_shadow.png"
-            animation_names = [f"{state}_{direction}" for direction in ["down", "left", "right", "up"]] # This order is important because it is the order in which the animations appear in the sprites
+            animation_names = [f"{state}_{direction}" for direction in ["s", "w", "e", "n"]] # This order is important because it is the order in which the animations appear in the sprites
             self.animations |= load_animations(filepath, 64, 64, animation_names)
 
         self.animation_index = 0
-        self.animation_name = self.state + "_" + self.direction.name
+        self.animation_name = self.state + "_" + self.direction.get_4_direction_name()
         self.surf: pygame.Surface = self.animations[self.animation_name][0]
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
 
@@ -91,6 +89,11 @@ class HumanSprite(EntitySprite):
 class SpectatorSprite(EntitySprite):
     def __init__(self, id: int, position: Vector2 = None, direction: Direction = None, state: str = None):
         super().__init__(id, position, direction, state)
+
+        # UI logic
+        self.surf = pygame.Surface((16, 16))
+        for key1 in self.animations:
+            self.animations[key1] = {0: pygame.Surface((16, 16), pygame.SRCALPHA)}
 
 
 def load_animations(filepath: str, frame_width, frame_height, animation_names):

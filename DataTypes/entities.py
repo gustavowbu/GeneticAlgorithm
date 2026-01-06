@@ -84,6 +84,9 @@ class Entity():
         area_bl = area_bl.neg_x()
         return (br.gt(area_tl) and tl.lt(area_br)) or (bl.gt(area_tr) and tr.lt(area_bl)) """
 
+    def copy(self) -> Self:
+        return type(self)(id=self.id, position=self.position, direction=self.direction, state=self.state)
+
 class Human(Entity):
     def __init__(self, id: int, position: Vector2, direction: Direction, state: str):
         super().__init__(id, position, direction, state)

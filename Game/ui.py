@@ -1,4 +1,5 @@
 import os
+import threading
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from pygame.locals import (
@@ -9,7 +10,7 @@ from pygame.locals import (
 
 from DataTypes.Vector2 import Vector2
 from DataTypes.Direction import Direction
-from Game.EntityList import EntityList
+from DataTypes.EntityList import EntityList
 from Game.entities_ui import EntitySprite, HumanSprite, SpectatorSprite
 
 import client
@@ -43,6 +44,15 @@ def update_entities():
     for entity_sprite in entities:
         if not entity_sprite.id in game_entities:
             entities.remove(entity_sprite.id)
+            all_sprites.remove(entity_sprite)
+
+stop_event = threading.Event()
+def update_loop():
+    while not stop_event.is_set():
+        update_entities()
+
+thread = threading.Thread(target=update_loop)
+thread.start()
 
 # Init pygame
 pygame.init()
@@ -82,8 +92,9 @@ while running:
     pygame.display.flip()
 
     # Tick
-    update_entities()
     clock = pygame.time.Clock()
     clock.tick(60)
 
+stop_event.set()
+thread.join()
 client.leave_server()
