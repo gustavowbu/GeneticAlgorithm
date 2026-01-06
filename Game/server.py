@@ -10,7 +10,7 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Bind the socket to the address and port
 server_address = ("localhost", 65432)
-print(f"\nStarting up on {server_address[0]} port {server_address[1]}")
+print(f"\nStarting up server on address {server_address[0]} port {server_address[1]}")
 server_socket.bind(server_address)
 
 while True:

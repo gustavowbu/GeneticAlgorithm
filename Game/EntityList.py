@@ -3,11 +3,11 @@ from typing import Self
 
 from DataTypes.Vector2 import Vector2
 from DataTypes.Direction import Direction
-from Game.entities import Entity, Person, Spectator
+from Game.entities import Entity, Human, Spectator
 
 class EntityList():
     default_position = Vector2(0, 0)
-    last_id = 0
+    entity_id = 0
 
     iter_index = 0
 
@@ -32,17 +32,17 @@ class EntityList():
         if position is None:
             position = self.default_position
         if direction is None:
-            direction = Direction("up")
+            direction = Direction("n")
         if state is None:
             state = "idle"
 
-        if entity_type == "Person":
-            entity = Person(self.last_id, position, direction, state)
+        if entity_type == "Human":
+            entity = Human(self.entity_id, position, direction, state)
         elif entity_type == "Spectator":
-            entity = Spectator(self.last_id, position, direction, state)
+            entity = Spectator(self.entity_id, position, direction, state)
         else:
-            raise ValueError("'entity_type' must be 'Person' or 'Spectator'")
-        self.last_id += 1
+            raise ValueError("'entity_type' must be 'Human' or 'Spectator'")
+        self.entity_id += 1
 
         self.entities.append(entity)
 
