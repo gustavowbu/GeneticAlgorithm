@@ -1,4 +1,3 @@
-import json
 from typing import Self
 
 from DataTypes.Vector2 import Vector2
@@ -14,17 +13,19 @@ class EntityList():
     def __init__(self, entities: list[Entity] = None):
         self.entities = entities if not entities is None else []
 
+    def from_str(self, string: str, gon) -> Self:
+        """ returns a new EntityList from a string in the format 'EntityList(entities)' """
+
+        result = type(self)()
+        string = string[11:-1]
+        result.entities = gon.loads(string)
+        return result
+
     def __repr__(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
-        return str(self.entities)
-
-    def to_json_str(self) -> str:
-        return json.dumps({i: entity.to_dict() for i, entity in enumerate(self.entities)})
-
-    def __bytes__(self) -> bytes:
-        return bytes(self.to_json_str())
+        return f"EntityList(entities={self.entities})"
 
     def add(self, entity_type: str, position: Vector2 = None, direction: int = None, state: str = None):
         """ Adds an entity and returns it. """
@@ -64,12 +65,6 @@ class EntityList():
             if self.entities[i].id == id:
                 return self.entities[i]
         raise IndexError(f"No entity with id '{id}'")
-
-    def find(self, id: int) -> Entity:
-        for i in range(len(self.entities)):
-            if self.entities[i].id == id:
-                return self.entities[i]
-        return -1
 
     def __contains__(self, id: int) -> bool:
         for entity in self.entities:

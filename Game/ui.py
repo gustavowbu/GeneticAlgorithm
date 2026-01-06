@@ -12,12 +12,11 @@ import socket
 from DataTypes.Vector2 import Vector2
 from DataTypes.Direction import Direction
 from Game.EntityList import EntityList
-from Game.entities import Entity, Person
-import Game.functions as funcs
+from Game.entities import Entity, Human, Spectator
+
+import client
 
 # Variables
-update = 10
-
 entities = EntityList()
 all_sprites: pygame.sprite.Group = pygame.sprite.Group()
 
@@ -72,13 +71,13 @@ def update_entities():
                 entity.direction = new_entity["direction"]
                 entity.state = new_entity["state"]
             else:
-                if new_entity["entity_type"] == "Person":
+                if new_entity["entity_type"] == "Human":
                     new_entity.pop("entity_type")
-                    new_entity = Person(**new_entity)
+                    new_entity = Human(**new_entity)
                 elif new_entity["entity_type"] == "Spectator":
                     continue #TODO: Implement
                 else:
-                    raise TypeError("'entity_type' must be 'Person'")
+                    raise TypeError("'entity_type' must be 'Human'")
                 new_entity.init_ui()
                 entities.append(new_entity)
                 print(new_entity)
@@ -97,7 +96,7 @@ window = pygame.display.set_mode(WINDOW_SIZE)
 canvas = pygame.Surface(LOGICAL_SIZE)
 
 # Connect to server
-join_server()
+client.spectate_server()
 
 running = True
 while running:
@@ -114,7 +113,7 @@ while running:
     canvas.fill((155, 250, 106))
 
     # Display and tick sprites
-    update_entities()
+    # update_entities()
     for sprite in all_sprites:
         canvas.blit(sprite.surf, sprite.rect)
         sprite.tick()
@@ -126,107 +125,5 @@ while running:
     # Tick
     clock = pygame.time.Clock()
     clock.tick(60)
-    update -= 1
 
-""" def update_entities():
-    global entities, ADDENTITY, player_id
-    entities_alive = [False for i in range(len(entities))]
-
-
-    with open("Game/entities.txt") as file:
-        file = file.readlines()
-
-    new_entities = []
-    for new_entity in file:
-        new_entity = new_entity[:-1]
-        properties = new_entity.split("; ")
-        dictionary = {}
-        for property in properties:
-            key, value = property.split(": ")
-            if value.isdecimal():
-                value = int(value)
-            elif value.startswith("Vector2"):
-                x, y = value[8:-1].split(", ")
-                value = Vector2(float(x), float(y))
-            if key == "direction":
-                value = Direction(value)
-            dictionary[key] = value
-
-        entity_type = dictionary["entity_type"]
-        dictionary.pop("entity_type")
-        if entity_type == "Person":
-            new_entity = Person(**dictionary)
-        else:
-            raise ValueError("'entity_type' must be 'Person', ")
-
-        new_entities.append(new_entity)
-
-        match = False
-        for index, entity in enumerate(entities):
-            if entity.id == new_entity.id:
-                entities_alive[index] = True
-                match = True
-                break
-        if match: # Updating existing entities
-            if new_entity.id != player_id: # Don't update the player
-                entity.position = new_entity.position
-                entity.direction = new_entity.direction
-                entity.state = new_entity.state
-        else: # Adding new entities
-            pygame.event.post(
-                pygame.event.Event(
-                    ADDENTITY,
-                    id=new_entity.id,
-                    entity_type=new_entity.__class__.__name__,
-                    position=new_entity.position,
-                    direction=new_entity.direction,
-                    state=new_entity.state
-                )
-            )
-
-    for index, entity in enumerate(entities): # Removing missing entities
-        if not entities_alive[index]:
-            entity.kill()
-
-def get_entity_by_id(id: int):
-    global entities
-
-    for entity in entities:
-        if entity.id == id:
-            return entity
-
-def activate_player():
-    global player_active
-    player_active = True
-
-def create_player():
-    global entities, player_id, ADDENTITY
-
-    # Getting highest id
-    player_id = 0
-    for entity in entities:
-        if entity.id > player_id:
-            player_id = entity.id
-    player_id += 1
-
-    pygame.event.post(
-        pygame.event.Event(
-            ADDENTITY,
-            id=player_id,
-            entity_type="Person",
-            position=Vector2(280, 157.5),
-            direction=Direction(2),
-            state="idle"
-        )
-    )
-
-    with open("Game/entities.txt", "a") as file:
-        file.write(f"id: {player_id}; entity_type: Person; position: Vector2(280, 157.5); direction: 2; state: idle\n")
-
-def update_file():
-    new_content = ""
-    for entity in entities:
-        new_content += str(entity) + "\n"
-
-    with open("Game/entities.txt", "w") as file:
-        file.write(new_content) """
+client.leave_server()

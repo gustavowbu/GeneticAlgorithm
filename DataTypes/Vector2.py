@@ -20,7 +20,7 @@ class Vector2():
         return str(self)
 
     def __str__(self):
-        return f"Vector2({self.x}, {self.y})"
+        return f"Vector2(x={self.x}, y={self.y})"
 
     def __getitem__(self, key: int) -> float:
         if key == 0:
@@ -65,21 +65,45 @@ class Vector2():
             return len(self) <= other
         return len(self) <= len(other)
 
-    def gt(self, other: Self) -> bool:
-        other = to_Vector2(other)
-        return self.x > other.x and self.y > other.y
+    def gt(self, other: Self, mode: str = "len") -> bool:
+        if mode == "len":
+            return self > other
+        elif mode == "and":
+            other = to_Vector2(other)
+            return self.x > other.x and self.y > other.y
+        elif mode == "or":
+            other = to_Vector2(other)
+            return self.x > other.x or self.y > other.y
 
-    def lt(self, other: Self) -> bool:
-        other = to_Vector2(other)
-        return self.x < other.x and self.y < other.y
+    def lt(self, other: Self, mode: str = "len") -> bool:
+        if mode == "len":
+            return self < other
+        elif mode == "and":
+            other = to_Vector2(other)
+            return self.x < other.x and self.y < other.y
+        elif mode == "or":
+            other = to_Vector2(other)
+            return self.x < other.x or self.y < other.y
 
-    def ge(self, other: Self) -> bool:
-        other = to_Vector2(other)
-        return self.x >= other.x and self.y >= other.y
+    def ge(self, other: Self, mode: str = "len") -> bool:
+        if mode == "len":
+            return self >= other
+        elif mode == "and":
+            other = to_Vector2(other)
+            return self.x >= other.x and self.y >= other.y
+        elif mode == "or":
+            other = to_Vector2(other)
+            return self.x >= other.x or self.y >= other.y
 
-    def le(self, other: Self) -> bool:
-        other = to_Vector2(other)
-        return self.x <= other.x and self.y <= other.y
+    def le(self, other: Self, mode: str = "len") -> bool:
+        if mode == "len":
+            return self <= other
+        elif mode == "and":
+            other = to_Vector2(other)
+            return self.x <= other.x and self.y <= other.y
+        elif mode == "or":
+            other = to_Vector2(other)
+            return self.x <= other.x or self.y <= other.y
 
     def __neg__(self):
         return Vector2(-self.x, -self.y)
