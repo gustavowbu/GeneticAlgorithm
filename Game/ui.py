@@ -21,7 +21,7 @@ all_sprites: pygame.sprite.Group = pygame.sprite.Group()
 
 # Functions
 def update_entities():
-    game_entities = client.getinfo()
+    game_entities = client.get_info()
     for entity in game_entities:
         # New entity
         if not entity.id in entities:

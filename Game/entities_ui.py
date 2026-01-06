@@ -38,11 +38,11 @@ class EntitySprite(pygame.sprite.Sprite):
         self.rect.center = self.position.to_tuple()
 
     def tick(self):
-        self.animation_name = self.state + "_" + self.direction.name
+        self.animation_name = self.state + "_" + self.direction.get_4_direction_name()
         if self.state == "idle":
             self.animation_fps = 10
         else:
-            self.animation_fps = 20
+            self.animation_fps = 15
 
         ticks_per_frame = 60 // self.animation_fps
         num_frames = len(self.animations[self.animation_name])

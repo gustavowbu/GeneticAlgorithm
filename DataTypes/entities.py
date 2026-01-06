@@ -12,6 +12,7 @@ class Entity():
         self.state = state
 
         self.speed = 5
+        self.pressed_keys = {"up": False, "right": False, "down": False, "left": False, "interact": False, "hit": False}
 
     def from_str(self, string: str) -> Self:
         """ returns a new Entity from a string in the format 'Entity(id, position, direction, state)' """
@@ -25,20 +26,38 @@ class Entity():
         return result
 
     def tick(self, globals: dict):
-        if self.state == "walk":
-            north = "n" in self.direction.name
-            east = "e" in self.direction.name
-            south = "s" in self.direction.name
-            west = "w" in self.direction.name
+        # Save key presses in variables
+        north = self.pressed_keys["up"]
+        east = self.pressed_keys["right"]
+        south = self.pressed_keys["down"]
+        west = self.pressed_keys["left"]
 
-            hsp = east - west
-            vsp = south - north
+        # Get horizontal and vertical speeds
+        hsp = east - west
+        vsp = south - north
+        if hsp and vsp:
+            hsp /= 1.414213562
+            vsp /= 1.414213562
 
-            if hsp and vsp:
-                hsp /= 1.414213562
-                vsp /= 1.414213562
+        # Get direction
+        direction = ""
+        if vsp > 0:
+            direction += "s"
+        elif vsp < 0:
+            direction += "n"
+        if hsp > 0:
+            direction += "e"
+        elif hsp < 0:
+            direction += "w"
+        if direction != "":
+            self.direction = Direction(direction)
 
-            self.position += (hsp, vsp)
+        # Change state and position
+        self.state = "idle"
+        if hsp or vsp:
+            self.state = "walk"
+
+            self.position += Vector2(hsp, vsp) * self.speed
 
             world_max: Vector2 = globals["world_max"]
 

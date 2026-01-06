@@ -67,13 +67,17 @@ def leave_server():
     client_socket.close()
     print("Left server.")
 
-def getinfo() -> EntityList:
+def get_info() -> EntityList:
     """ Gets entity info from the server. """
 
-    message = {"type": "getinfo"}
+    message = {"type": "get info"}
     _send_message(message)
     message = _receive_message()
     if message["type"] == "game info update":
         return message["entities"]
     elif message["type"] == "error":
         return message["description"]
+
+def press_keys(**pressed_keys):
+    message = {"type": "press keys", "id": id} | {"up": False, "right": False, "down": False, "left": False, "interact": False, "hit": False} | pressed_keys
+    _send_message(message)

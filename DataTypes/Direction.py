@@ -16,7 +16,7 @@ class Direction():
             self.name = direction
             self.number = {"n": 0, "ne": 1, "e": 2, "se": 3, "s": 4, "sw": 5, "w": 6, "nw": 7}[direction]
         elif isinstance(direction, int):
-            direction = direction % 4
+            direction = direction % 8
             self.number = direction
             self.name = {0: "n", 1: "ne", 2: "e", 3: "se", 4: "s", 5: "sw", 6: "w", 7: "nw"}[direction]
 

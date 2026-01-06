@@ -15,6 +15,7 @@ server_socket.bind(server_address)
 
 # Variables
 joined_ids = []
+suppress_get_info = True
 
 # Functions
 def send_message(message: dict, address):
@@ -35,14 +36,15 @@ while True:
         message = data.decode("utf-8")
         m: dict = gon.loads(message)
 
-        print("\nReceived {} bytes from {}".format(len(data), address))
-        print(f"Message received: {m}")
+        # print("\nReceived {} bytes from {}".format(len(data), address))
+        # print(f"Message received: {m}")
 
         # m = {"type": ...}
         if m["type"] == "sign up":
             m.pop("type")
             human = logic.entities.add(entity_type="Human")
             logic.load_entity(human.id)
+            print()
             print(f"    Human joining.")
             print(f"    Sending message with id: {human.id}")
             send_message({"type": "id", "value": human.id}, address)
@@ -61,6 +63,7 @@ while True:
             m.pop("type")
             spectator = logic.entities.add(entity_type="Spectator")
             logic.load_entity(spectator.id)
+            print()
             print(f"    Spectator joining.")
             print(f"    Sending message with id: {spectator.id}")
             send_message({"type": "id", "value": spectator.id}, address)
@@ -68,21 +71,32 @@ while True:
         elif m["type"] == "leave":
             id = m["id"]
             logic.unload_entity(id)
+            print()
             print(f"    Human/Spectator leaving. ID: {id}")
             kick_id(id)
             print(f"    Sending goodbye message.")
             send_message({"type": "text", "info": "You left the server. We will miss you."}, address)
         # m = {"type": ...}
-        elif m["type"] == "getinfo":
+        elif m["type"] == "get info":
             message = {"type": "game info update"} | {"entities": logic.loaded_entities.copy()}
             send_message(message, address)
-            print(f"    Sending info: {message}")
+            if not suppress_get_info:
+                print()
+                print(f"    Sending info: {message}")
         # m = {"type": ..., "id": ..., "position": ..., "direction": ..., "state": ...}
-        elif m["type"] == "sendinfo":
+        elif m["type"] == "send info":
             # TODO
             """ person: Person = logic.entities[m["id"]]
             m.pop(("type", "id"))
             print(f"    Updating info: {m}")
             person.update(**m) """
+        # m = {"type": ..., "id": ..., "up": ..., "right": ..., "down": ..., "left": ..., "interact": ..., "hit": ...}
+        elif m["type"] == "press keys":
+            m.pop("type")
+            id = m["id"]
+            m.pop("id")
+            print()
+            print(f"    Human with id {id} pressed keys: {m}")
+            logic.press_keys(id=id, **m)
     except Exception as e:
         print("Error:", e)

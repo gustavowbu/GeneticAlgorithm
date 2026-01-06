@@ -1,6 +1,7 @@
 import threading
 import time
 
+from DataTypes.Direction import Direction
 from DataTypes.Vector2 import Vector2
 from DataTypes.EntityList import EntityList
 
@@ -26,12 +27,17 @@ globals = {"world_max": world_max, "camera_size": camera_size}
 
 def load_entity(id: int):
     entity = entities[id]
+    # entity.state = "walk"
+    # entity.direction = Direction(3)
     loaded_entities.append(entity)
 
 def unload_entity(id: int):
     loaded_entities.remove(id)
 
-tps = 2
+def press_keys(id: int, **pressed_keys: dict):
+    entities[id].pressed_keys = pressed_keys
+
+tps = 20
 
 def tick():
     for entity in loaded_entities:
