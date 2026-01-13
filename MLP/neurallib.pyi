@@ -1,0 +1,29 @@
+from typing import List
+
+class mlp:
+    layer_sizes: List[int]
+    biases: List[List[float]]
+    weights: List[List[List[float]]]
+    activation_functions: List[str]
+
+    def __init__(
+        self,
+        layer_sizes: List[int],
+        activation_functions: List[str],
+    ) -> None: ...
+    
+    def __repr__(self) -> str: ...
+
+    def randomize(self) -> None: ...
+
+    def mutate(self, rate: float) -> None: ...
+
+    def relu(self, x: float) -> float: ...
+
+    def sigmoid(self, x: float) -> float: ...
+
+    def forward_propagate(self, inputs: List[float]) -> List[float]: ...
+
+    def get_weights(self) -> List[List[List[float]]]: ...
+
+    def get_biases(self) -> List[List[float]]: ...
